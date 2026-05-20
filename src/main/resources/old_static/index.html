@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="bg">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Dkont</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<header class="topbar">
+    <div>
+        <p class="eyebrow">Логистична компания</p>
+        <h1>Dkont</h1>
+    </div>
+    <div class="session-panel">
+        <label>
+            Роля
+            <select id="roleSelect">
+                <option value="ADMIN">Администратор</option>
+                <option value="EMPLOYEE">Служител</option>
+                <option value="CLIENT">Клиент</option>
+            </select>
+        </label>
+        <label id="clientFilterLabel">
+            Клиент
+            <select id="clientFilter"></select>
+        </label>
+    </div>
+</header>
+
+<main class="shell">
+    <nav class="tabs" aria-label="Основна навигация">
+        <button class="active" data-view="dashboard">Табло</button>
+        <button data-view="shipments">Пратки</button>
+        <button data-view="clients" data-admin="true">Клиенти</button>
+        <button data-view="employees" data-admin="true">Служители</button>
+        <button data-view="offices" data-admin="true">Офиси</button>
+        <button data-view="reports">Справки</button>
+    </nav>
+
+    <section id="dashboard" class="view active">
+        <div class="section-heading">
+            <div>
+                <p class="eyebrow">Операции</p>
+                <h2>Текущо състояние</h2>
+            </div>
+        </div>
+        <div class="metrics">
+            <article><span id="shipmentCount">0</span><p>регистрирани пратки</p></article>
+            <article><span id="openCount">0</span><p>неполучени пратки</p></article>
+            <article><span id="clientCount">0</span><p>клиенти</p></article>
+            <article><span id="employeeCount">0</span><p>служители</p></article>
+        </div>
+        <div class="split">
+            <section>
+                <h3>Компания</h3>
+                <div id="companyInfo" class="info-list"></div>
+            </section>
+            <section>
+                <h3>Бърза регистрация на пратка</h3>
+                <form id="shipmentForm" class="form-grid"></form>
+            </section>
+        </div>
+    </section>
+
+    <section id="shipments" class="view">
+        <div class="section-heading">
+            <div>
+                <p class="eyebrow">Регистър</p>
+                <h2>Пратки</h2>
+            </div>
+            <button id="refreshShipments" class="secondary">Обнови</button>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Подател</th>
+                    <th>Получател</th>
+                    <th>Доставка</th>
+                    <th>Тегло (кг.)</th>
+                    <th>Цена</th>
+                    <th>Статус</th>
+                    <th>Дата</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody id="shipmentsBody"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <section id="clients" class="view">
+        <div class="section-heading">
+            <div><p class="eyebrow">Регистър</p><h2>Клиенти</h2></div>
+        </div>
+        <div class="split">
+            <form id="clientForm" class="form-grid"></form>
+            <div class="table-wrap compact"><table><tbody id="clientsBody"></tbody></table></div>
+        </div>
+    </section>
+
+    <section id="employees" class="view">
+        <div class="section-heading">
+            <div><p class="eyebrow">Екип</p><h2>Служители</h2></div>
+        </div>
+        <div class="split">
+            <form id="employeeForm" class="form-grid"></form>
+            <div class="table-wrap compact"><table><tbody id="employeesBody"></tbody></table></div>
+        </div>
+    </section>
+
+    <section id="offices" class="view">
+        <div class="section-heading">
+            <div><p class="eyebrow">Мрежа</p><h2>Офиси</h2></div>
+        </div>
+        <div class="split">
+            <form id="officeForm" class="form-grid"></form>
+            <div class="table-wrap compact"><table><tbody id="officesBody"></tbody></table></div>
+        </div>
+    </section>
+
+    <section id="reports" class="view">
+        <div class="section-heading">
+            <div><p class="eyebrow">Справки</p><h2>Приходи и активни пратки</h2></div>
+        </div>
+        <form id="reportForm" class="inline-form">
+            <label>От <input type="date" name="from"></label>
+            <label>До <input type="date" name="to"></label>
+            <button>Изчисли</button>
+        </form>
+        <div id="reportSummary" class="report-summary"></div>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>ID</th><th>Подател</th><th>Получател</th><th>Статус</th><th>Цена</th></tr></thead>
+                <tbody id="openShipmentsBody"></tbody>
+            </table>
+        </div>
+    </section>
+</main>
+
+<script src="/app.js"></script>
+</body>
+</html>

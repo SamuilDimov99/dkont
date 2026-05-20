@@ -1,0 +1,23 @@
+.idea/
+
+# Java / Maven
+target/
+*.class
+
+# Node / Vite
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Logs and local env
+*.log
+.env
+.env.*
+
+# Local application config — contains DB credentials, never commit these
+src/main/resources/application.properties
+src/main/resources/application-prod.properties
+
+# OS/editor noise
+.DS_Store
+Thumbs.db

@@ -1,0 +1,14 @@
+su postgres
+psql
+CREATE USER dkont WITH PASSWORD 'dkont';
+CREATE DATABASE dkont OWNER dkont;
+GRANT ALL PRIVILEGES ON DATABASE dkont TO dkont;
+ALTER DATABASE dkont OWNER TO dkont;
+\q
+
+mariadb -u root -p
+CREATE DATABASE dkont;
+CREATE USER 'dkont'@'localhost' IDENTIFIED BY 'dkont';
+GRANT ALL PRIVILEGES ON dkont.* TO 'dkont'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;
