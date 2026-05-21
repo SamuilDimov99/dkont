@@ -318,9 +318,11 @@ export function Shipments({ data, shipments, role, session, currentOffice, onRef
     if (shipment.status === "DELIVERED" || shipment.status === "CANCELLED") return false;
     if (role === "CLIENT") return false;
     if (role === "ADMIN") return true;
+    // OFFICE_EMPLOYEE: can only hand over shipments arriving at their own office counter
     if (session?.employeeType === "OFFICE_EMPLOYEE") {
       return shipment.deliveryType === "TO_OFFICE" && shipment.destinationOfficeId === currentOffice?.id;
     }
+    // COURIER: only delivers TO_ADDRESS shipments — they drive to the recipient's door
     if (session?.employeeType === "COURIER") {
       return shipment.deliveryType === "TO_ADDRESS";
     }

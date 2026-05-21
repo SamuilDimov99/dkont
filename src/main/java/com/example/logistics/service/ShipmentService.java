@@ -16,7 +16,7 @@ public interface ShipmentService {
     Shipment getShipmentById(Long id);
     Shipment createShipment(Shipment shipment);
     Shipment updateShipment(Long id, Shipment shipment);
-    Shipment markDelivered(Long id);
+    Shipment markDelivered(Long id, String callerUsername);
     Shipment markInTransit(Long id);
     Shipment cancelShipment(Long id);
     void deleteShipment(Long id);

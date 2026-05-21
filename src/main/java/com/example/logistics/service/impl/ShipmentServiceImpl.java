@@ -1,13 +1,18 @@
 package com.example.logistics.service.impl;
 
 import com.example.logistics.model.DeliveryType;
+import com.example.logistics.model.Employee;
+import com.example.logistics.model.EmployeeType;
+import com.example.logistics.model.Role;
 import com.example.logistics.model.Shipment;
 import com.example.logistics.model.ShipmentStatus;
+import com.example.logistics.model.User;
 import com.example.logistics.repo.ClientRepository;
 import com.example.logistics.repo.CompanyRepository;
 import com.example.logistics.repo.EmployeeRepository;
 import com.example.logistics.repo.OfficeRepository;
 import com.example.logistics.repo.ShipmentRepository;
+import com.example.logistics.repo.UserRepository;
 import com.example.logistics.service.ShipmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -36,6 +41,7 @@ public class ShipmentServiceImpl implements ShipmentService {
     private final ClientRepository   clientRepository;
     private final EmployeeRepository employeeRepository;
     private final OfficeRepository   officeRepository;
+    private final UserRepository     userRepository;
 
     // ── Read operations ───────────────────────────────────────────────────────
 
@@ -153,10 +159,56 @@ public class ShipmentServiceImpl implements ShipmentService {
 
     // ── Status transitions ────────────────────────────────────────────────────
 
-    /** Marks a shipment as DELIVERED and records the delivery timestamp. */
+    /**
+     * Marks a shipment as DELIVERED, enforcing who is allowed to do so:
+     *
+     *   TO_ADDRESS  → only a COURIER can deliver it (they physically drive to the address)
+     *   TO_OFFICE   → only an OFFICE_EMPLOYEE can mark it collected (client picks it up at the counter)
+     *
+     * ADMINs bypass the check entirely so they can correct mistakes without restrictions.
+     * Any other role combination throws an IllegalArgumentException which the global
+     * exception handler converts to a 400 response with a human-readable message.
+     */
     @Override
-    public Shipment markDelivered(Long id) {
+    public Shipment markDelivered(Long id, String callerUsername) {
         Shipment shipment = getShipmentById(id);
+
+        // ADMINs can mark any shipment delivered regardless of type
+        User caller = userRepository.findByUsername(callerUsername);
+        if (caller != null && caller.getRole() == Role.ADMIN) {
+            shipment.setStatus(ShipmentStatus.DELIVERED);
+            shipment.setDeliveredAt(LocalDateTime.now());
+            return shipmentRepository.save(shipment);
+        }
+
+        // For all other callers, load the linked Employee record and check their type
+        Employee employee = employeeRepository.findByUsername(callerUsername);
+        if (employee == null) {
+            throw new IllegalArgumentException("Only employees or admins can mark shipments as delivered");
+        }
+
+        if (shipment.getDeliveryType() == DeliveryType.TO_ADDRESS) {
+            // Door-to-door delivery — only the courier physically goes to the address
+            if (employee.getEmployeeType() != EmployeeType.COURIER) {
+                throw new IllegalArgumentException(
+                        "Only a COURIER can mark a TO_ADDRESS shipment as delivered");
+            }
+        } else if (shipment.getDeliveryType() == DeliveryType.TO_OFFICE) {
+            // Office pickup — client comes to the counter, office employee hands it over
+            if (employee.getEmployeeType() != EmployeeType.OFFICE_EMPLOYEE) {
+                throw new IllegalArgumentException(
+                        "Only an OFFICE_EMPLOYEE can mark a TO_OFFICE shipment as delivered");
+            }
+            // The employee must work at the exact office the shipment is going to —
+            // they cannot mark deliveries on behalf of a different branch
+            Long employeeOfficeId    = employee.getOffice()                == null ? null : employee.getOffice().getId();
+            Long destinationOfficeId = shipment.getDestinationOffice()     == null ? null : shipment.getDestinationOffice().getId();
+            if (employeeOfficeId == null || !employeeOfficeId.equals(destinationOfficeId)) {
+                throw new IllegalArgumentException(
+                        "You can only mark shipments as delivered for your own office");
+            }
+        }
+
         shipment.setStatus(ShipmentStatus.DELIVERED);
         shipment.setDeliveredAt(LocalDateTime.now());
         return shipmentRepository.save(shipment);

@@ -180,9 +180,8 @@ function AppRoutes() {
 
   /**
    * Filters the full shipments list to only the shipments the current user should see:
-   *  - ADMIN / EMPLOYEE → all shipments
-   *  - CLIENT           → only shipments where they are the sender or recipient
-   *  - COURIER          → only shipments assigned to them as the courier
+   *  - ADMIN / EMPLOYEE (any type) → all shipments (assessment requirement 6)
+   *  - CLIENT                      → only shipments where they are the sender or recipient
    */
   const visibleShipments = useMemo(() => {
     if (!data) return [];
@@ -191,10 +190,7 @@ function AppRoutes() {
         (s) => s.senderClientId === Number(clientId) || s.receiverClientId === Number(clientId)
       );
     }
-    if (role === "EMPLOYEE" && session?.employeeType === "COURIER") {
-      return data.shipments.filter((s) => s.courierId === Number(session.employeeId));
-    }
-    return data.shipments;  // ADMIN and OFFICE_EMPLOYEE see everything
+    return data.shipments;  // ADMIN, COURIER, and OFFICE_EMPLOYEE all see every shipment
   }, [data, role, clientId, session]);
 
   // ── Routes ────────────────────────────────────────────────────────────────

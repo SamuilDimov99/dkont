@@ -8,8 +8,8 @@ admin.seed.email=admin@localhost
 
 # MySQL — create the database first, then fill in your credentials
 spring.datasource.url=jdbc:mysql://localhost/logistics-company?createDatabaseIfNotExist=true&useSSL=false
-spring.datasource.username=YOUR_DB_USERNAME
-spring.datasource.password=YOUR_DB_PASSWORD
+spring.datasource.username=root
+spring.datasource.password=441582
 spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 
 # JWT — replace with a strong random string (min 32 characters)

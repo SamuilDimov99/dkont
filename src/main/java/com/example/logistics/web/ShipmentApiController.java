@@ -4,6 +4,8 @@ import com.example.logistics.model.Shipment;
 import com.example.logistics.service.ShipmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -72,10 +74,20 @@ public class ShipmentApiController {
     }
 
     // Status transitions
+
+    /**
+     * Marks a shipment as DELIVERED.
+     * The caller's username is extracted from the validated JWT so the service
+     * can enforce the delivery-type rule without trusting any client-supplied ID.
+     *   TO_ADDRESS → caller must be a COURIER
+     *   TO_OFFICE  → caller must be an OFFICE_EMPLOYEE
+     *   ADMIN      → always allowed
+     */
     @PutMapping("/{id}/deliver")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void markDelivered(@PathVariable long id) {
-        shipmentService.markDelivered(id);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        shipmentService.markDelivered(id, auth.getName());
     }
 
     @PutMapping("/{id}/transit")

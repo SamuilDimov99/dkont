@@ -25,6 +25,11 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     @Query("SELECT e FROM Employee e WHERE e.user.id = :userId")
     Employee findByUserId(@Param("userId") Long userId);
 
+    /** Looks up an employee directly by the username stored on the linked User. */
+    @EntityGraph(attributePaths = {"user", "company", "office"})
+    @Query("SELECT e FROM Employee e WHERE e.user.username = :username")
+    Employee findByUsername(@Param("username") String username);
+
     @EntityGraph(attributePaths = {"user", "company", "office"})
     @Query("SELECT e FROM Employee e WHERE e.company.id = :companyId")
     List<Employee> findByCompanyId(@Param("companyId") Long companyId);
